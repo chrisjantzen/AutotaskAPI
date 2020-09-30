@@ -335,8 +335,13 @@ function Remove-AutotaskAPIResource {
 function New-AutotaskAPIResource {
     [CmdletBinding()]
     Param(
+        [Parameter(ParameterSetName = 'ID', Mandatory = $true)]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [String]$ID,
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]$Body
     )
+        
+       
     DynamicParam {
         $Script:POSTParameter
     }
@@ -352,6 +357,9 @@ function New-AutotaskAPIResource {
     
     process {
         $SendingBody = $body | ConvertTo-Json -Depth 10
+        if ($ID) {
+            $ResourceURL = ("$($ResourceURL)" -replace '{parentid}', "$($ID)") 
+        }
         try {
             Invoke-RestMethod -Uri "$($Script:AutotaskBaseURI)/$($resourceurl)"  -headers $Headers -Method post -Body $SendingBody
         }
@@ -392,6 +400,9 @@ function New-AutotaskAPIResource {
 function Set-AutotaskAPIResource {
     [CmdletBinding()]
     Param(
+        [Parameter(ParameterSetName = 'ID', Mandatory = $true)]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [String]$ID,
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]$body
     )
     DynamicParam {
@@ -409,6 +420,9 @@ function Set-AutotaskAPIResource {
     }
     
     process {
+        if ($ID) {
+            $ResourceURL = ("$($ResourceURL)" -replace '{parentid}', "$($ID)") 
+        }
         try {
             $SendingBody = $PSBoundParameters.body | ConvertTo-Json -Depth 10
             Invoke-RestMethod -Uri "$($Script:AutotaskBaseURI)/$($ResourceURL)" -headers $Headers -Body $SendingBody -Method Patch
